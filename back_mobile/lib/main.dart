@@ -44,23 +44,25 @@ class _LodingState extends State<Loding> {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return  MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Center(
             child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
+            const Padding(
                 padding: EdgeInsets.all(1),
-                child: Image(
-                  image: AssetImage('assets/images/1702198475838.jpg'),
-                  width: 150,
-                  height: 150,
+                child: Center(
+                  child: Image(
+                    image: AssetImage('assets/images/1702198475838.jpg'),
+                    width: 150,
+                    height: 150,
+                  ),
                 )),
             Padding(padding: EdgeInsets.only(top: 10),
             child: SpinKitWave(
-              color: Colors.white,
+              color: Colors.orange[600],
               size: 30,
 
             

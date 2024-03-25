@@ -85,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                       // Check username and password
                       if (nameController.text == "said" &&
                           passwordController.text == "1234") {
-                              Route route = MaterialPageRoute(builder: ((context) =>  ScanPage()));
+                              Route route = MaterialPageRoute(builder: ((context) =>  MyApp()));
                         Navigator.push(
                           context,route
                           
@@ -111,8 +111,8 @@ class _LoginPageState extends State<LoginPage> {
                         );
                       }
                     },
-                    icon: Icon(Icons.login, color: Colors.white),
-                    label: Text("Log In", style: TextStyle(color: Colors.white)),
+                    icon:const Icon(Icons.login, color: Colors.white),
+                    label: const Text("Log In", style: TextStyle(color: Colors.white)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFC83A31),
                       padding: const EdgeInsets.symmetric(vertical: 15),
