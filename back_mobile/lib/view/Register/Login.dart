@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 30),
+                const SizedBox(height: 5),
                 Center(
                   child: Image(
                     image: AssetImage("assets/images/1702198475838.jpg"),
@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
                     height: 150,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 Padding(
                   padding: const EdgeInsets.all(5),
                   child: Column(

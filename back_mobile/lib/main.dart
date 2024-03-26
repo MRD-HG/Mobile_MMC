@@ -12,12 +12,10 @@ class LodingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  const MaterialApp(
-      home:Scaffold(
-        body: Loding(),
-        )
-
-    );
+    return const MaterialApp(
+        home: Scaffold(
+      body: Loding(),
+    ));
   }
 }
 
@@ -44,29 +42,35 @@ class _LodingState extends State<Loding> {
 
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Center(
             child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Padding(
-                padding: EdgeInsets.all(1),
-                child: Center(
-                  child: Image(
-                    image: AssetImage('assets/images/1702198475838.jpg'),
-                    width: 150,
-                    height: 150,
-                  ),
-                )),
-            Padding(padding: EdgeInsets.only(top: 10),
-            child: SpinKitWave(
-              color: Colors.orange[600],
-              size: 30,
+            Column(
+          mainAxisAlignment: MainAxisAlignment.center,
 
-            
-              ),)
+              children: [
+                const Padding(
+                    padding: EdgeInsets.all(1),
+                    child: Center(
+                      child: Image(
+                        image: AssetImage('assets/images/1702198475838.jpg'),
+                        width: 150,
+                        height: 150,
+                      ),
+                    )),
+                Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: SpinKitWave(
+                    color: Colors.orange[600],
+                    size: 30,
+                  ),
+                )
+              ],
+            ),
           ],
         )),
       ),

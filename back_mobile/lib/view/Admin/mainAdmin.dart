@@ -10,14 +10,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: ScanPage(),
-     
     );
   }
 }
 
 class ScanPage extends StatefulWidget {
   @override
-  State<ScanPage> createState() => _ScanPageState();
+  _ScanPageState createState() => _ScanPageState();
 }
 
 class _ScanPageState extends State<ScanPage> {
@@ -25,117 +24,199 @@ class _ScanPageState extends State<ScanPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // title: const Text("MMC",
-        // style: TextStyle(
-        //   fontWeight: FontWeight.bold,
-        //   color: Color(0xFFc83a31)
-        // ),
-        // ),
-        centerTitle: true,
-        leading:const SizedBox(
-           width: 200,
-            height: 200,
-          child:  Image(
-            image: AssetImage("assets/images/logo-only.png"),
-           width: 100,
-            height: 100,
-            fit: BoxFit.fill,),
-        )
+        leading: Image(image: AssetImage("assets/images/logo-only.png")),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              Expanded(
-                child: GridView.count(
-                  shrinkWrap: true,
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  children: [
-                    CounterCard(color1: Color(0xFF74b2da), color2: Color(0xFFa5ca6d), text: 'Events'),
-                    CounterCard(color1: Color(0xFFeebc54), color2: Color(0xFFc83a31), text: 'Speakers'),
-                    CounterCard(color1: Color(0xFFc83a31), color2: Color(0xFF74b2da), text: 'Participant'),
-                    CounterCard(color1: Color(0xFFa5ca6d), color2: Color(0xFFeebc54), text: 'City'),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(Icons.qr_code, color: Colors.white),
-                  label: Text("Scan QR", style: TextStyle(color: Colors.white)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFC83A31),
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+      body: CustomScrollView(
+        primary: false,
+        slivers: <Widget>[
+          SliverPadding(
+            padding: const EdgeInsets.all(20),
+            sliver: SliverGrid.count(
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              crossAxisCount: 2,
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                      color: Colors.lightBlue[50],
+                      borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.all(8),
+                  child: const Column(
+                    children: [
+                      Icon(
+                        Icons.event,
+                        size: 50,
+                        color: Color(0xFF74b2da),
+                      ),
+                      Text(
+                        "Events",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "0",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                Container(
+                  decoration: BoxDecoration(
+                      color: Colors.yellow[50],
+                      borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.all(8),
+                  child: const Column(
+                    children: [
+                      Icon(
+                        Icons.alarm,
+                        size: 50,
+                        color: Color(0xFFeebc54),
+                      ),
+                      Text(
+                        "Sessions",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "0",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      color: Colors.red[50],
+                      borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.all(8),
+                  child: const Column(
+                    children: [
+                      Icon(
+                        Icons.location_city,
+                        size: 50,
+                        color: Color(0xFFc83a31),
+                      ),
+                      Text(
+                        "City",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "0",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      color: Colors.green[50],
+                      borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.all(8),
+                  child: const Column(
+                    children: [
+                      Icon(
+                        Icons.groups_2,
+                        size: 50,
+                        color: Color(0xFFa5ca6d),
+                      ),
+                      Text(
+                        "Participant",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "0",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          const SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Up comming Event"),
+                SizedBox(height: 10),
+                EventDetailCard(
+                  date: "12/14",
+                  eventName: "Flutter Conference",
+                  places: 100,
+                  local:"Rabat" ,
+                ), 
+                EventDetailCard(
+                  date: "04/15",
+                  eventName: "AI",
+                  places: 100,
+                  local:"Tanger"
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+class EventDetailCard extends StatelessWidget {
+  final String date;
+  final String eventName;
+  final int places;
+  final String local;
 
-class CounterCard extends StatefulWidget {
-  final Color color1;
-  final Color color2;
-  final String text;
-
-  CounterCard({required this.color1, required this.color2, required this.text});
-
-  @override
-  _CounterCardState createState() => _CounterCardState();
-}
-
-class _CounterCardState extends State<CounterCard> {
-  int counter = 0;
-
-  void incrementCounter() {
-    setState(() {
-      counter++;
-    });
-  }
+  const EventDetailCard({
+    Key? key,
+    required this.date,
+    required this.eventName,
+    required this.places,
+    required this.local,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: incrementCounter,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: [widget.color1, widget.color2],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(0, 3),
+            ),
+          ],
         ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
               Text(
-                widget.text,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                '$date',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
-              SizedBox(height: 10),
-              Text(
-                '$counter',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
+              SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$eventName',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      '$local',
+                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 14),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      'Available Places: $places',
+                      style: TextStyle(fontStyle: FontStyle.normal, fontSize: 14),
+                    ),
+                  ],
                 ),
               ),
             ],
