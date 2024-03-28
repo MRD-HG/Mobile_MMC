@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
 
-class MyApp extends StatelessWidget {
+class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,12 +17,35 @@ class ScanPage extends StatefulWidget {
 }
 
 class _ScanPageState extends State<ScanPage> {
+  bool show = true;
+
+  void _toggleSidebar() {
+    setState(() {
+      show = !show;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Image(image: AssetImage("assets/images/logo-only.png")),
+     
+           
+        
+        title: Center(
+          child: Row(
+            children: [
+              Image.asset(
+                'assets/images/logo-only.png',
+                height: 40,
+                width: 40,
+              ),
+            ],
+          ),
+        ),
+        centerTitle: true,
       ),
+    
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
@@ -135,19 +155,19 @@ class _ScanPageState extends State<ScanPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Up comming Event"),
+                Text("Upcoming Event"),
                 SizedBox(height: 10),
                 EventDetailCard(
                   date: "12/14",
                   eventName: "Flutter Conference",
                   places: 100,
-                  local:"Rabat" ,
-                ), 
+                  local: "Rabat",
+                ),
                 EventDetailCard(
                   date: "04/15",
                   eventName: "AI",
                   places: 100,
-                  local:"Tanger"
+                  local: "Tanger",
                 ),
               ],
             ),
@@ -157,6 +177,7 @@ class _ScanPageState extends State<ScanPage> {
     );
   }
 }
+
 class EventDetailCard extends StatelessWidget {
   final String date;
   final String eventName;
@@ -192,31 +213,42 @@ class EventDetailCard extends StatelessWidget {
           padding: const EdgeInsets.all(12.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Text(
-                '$date',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              ),
-              SizedBox(width: 10),
               Expanded(
+                flex: 2,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '$eventName',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                     SizedBox(height: 5),
                     Text(
                       '$local',
-                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 14),
+                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 14, color: Colors.grey),
                     ),
                     SizedBox(height: 5),
                     Text(
-                      'Available Places: $places',
-                      style: TextStyle(fontStyle: FontStyle.normal, fontSize: 14),
+                      'Date: $date',
+                      style: TextStyle(fontStyle: FontStyle.normal, fontSize: 14, color: Colors.grey),
                     ),
                   ],
+                ),
+              ),
+              SizedBox(width: 10),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Available Places: $places',
+                  style: TextStyle(color: Colors.white, fontSize: 14),
                 ),
               ),
             ],

@@ -1,3 +1,4 @@
+import 'package:back_mobile/view/montion_tab_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:back_mobile/view/Admin/mainAdmin.dart';
 
@@ -85,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                       // Check username and password
                       if (nameController.text == "said" &&
                           passwordController.text == "1234") {
-                              Route route = MaterialPageRoute(builder: ((context) =>  MyApp()));
+                              Route route = MaterialPageRoute(builder: ((context) =>  MontionTabBarPage()));
                         Navigator.push(
                           context,route
                           
