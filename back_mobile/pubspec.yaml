@@ -42,7 +42,7 @@ dependencies:
   motion_tab_bar: ^2.0.4
   flutter_barcode_scanner: 2.0.0
   get: ^4.6.6
-  http: ^1.2.1
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:

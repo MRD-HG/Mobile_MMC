@@ -1,74 +1,84 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:http/http.dart' as http;
 
-class QR_Scan extends StatefulWidget {
-  const QR_Scan({super.key});
-
+class QRCheckPage extends StatefulWidget {
   @override
-  State<QR_Scan> createState() => _QR_ScanState();
+  _QRCheckPageState createState() => _QRCheckPageState();
 }
 
-class _QR_ScanState extends State<QR_Scan> {
-   String qrResult="";
-  Future<void>ScanQR()async{
-  try{
-    final qrcode = await FlutterBarcodeScanner.scanBarcode('#ff6666', 'Cancel', true, ScanMode.QR);
-    if(!mounted)return;
-      setState(() {
-        this.qrResult= qrcode.toString();
-      });
+class _QRCheckPageState extends State<QRCheckPage> {
+  String qrResult = "";
 
-  }on PlatformException{
-    Icon(Icons.error);
-    qrResult = "Fail to Read QR Code";
+  Future<void> verifyQRCode(String qrResult) async {
+    final url = Uri.parse(
+        'https://fasttealbike95.conveyor.cloud/gateway/EventParticipant/VerifyQRCode');
+    final requestBody = {
+      "qrResult": qrResult,
+      "isParticipated": true,
+    };
+
+    try {
+      final response = await http.put(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        _showSuccessSnackBar('QR Code verified successfully');
+      } else if (response.statusCode == 404) {
+        _showErrorSnackBar('QR Code not found');
+      } else {
+        _showErrorSnackBar(
+            'Failed to verify QR Code. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showErrorSnackBar('Error occurred while verifying QR Code: $e');
+    }
   }
-  
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
-  
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          leading: const SizedBox(
-           width: 200,
-            height: 200,
-          child:  Image(
-            image: AssetImage("assets/images/logo-only.png"),
-           width: 100,
-            height: 100,
-            fit: BoxFit.fill,),
-        )
-        ),
-        body: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton.icon(
-              label:Center(child: Text("Scan The Code")),
-              icon: Icon(Icons.qr_code_scanner_rounded),
-              onPressed: ()=>{}, 
-              
-              ),
-              SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(qrResult,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-                    ElevatedButton.icon(
-                      onPressed: ScanQR,
-                    icon: const Icon(Icons.qr_code_2_outlined),
-                    label:Text("Scan QR_Code") ,
-                    
-                      )
-                  ],
-                ),
-              )
-            ],
-          ),
-
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('QR Check Page'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'QR Result: $qrResult',
+              style: TextStyle(fontSize: 18),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                verifyQRCode(qrResult);
+              },
+              child: Text('Verify QR Code'),
+            ),
+          ],
         ),
       ),
     );

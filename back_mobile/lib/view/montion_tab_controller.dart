@@ -7,7 +7,7 @@ import 'package:motion_tab_bar/MotionTabBar.dart';
 class MontionTabBarPage extends StatelessWidget {
    MontionTabBarPage({super.key});
      BottomNavigationController bottomNavigationController=Get.put(BottomNavigationController());
-    final screens =[MainPage(),QR_Scan()];
+    final screens =[MainPage(),QRCheckPage()];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
