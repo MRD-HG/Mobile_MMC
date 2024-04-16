@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MainPage extends StatelessWidget {
   @override
@@ -30,12 +30,14 @@ class _ScanPageState extends State<ScanPage> {
     super.initState();
     fetchEventData();
     fetchParticipantData();
+    fetchSessionData();
     fetchCityData();
     fetchLatestEventData();
   }
 
   Future<void> fetchEventData() async {
-    final response = await http.get(Uri.parse('https://fasttealbike95.conveyor.cloud/gateway/event'));
+    final response = await http.get(
+        Uri.parse('https://tallbrushedpen19.conveyor.cloud/gateway/event'));
 
     if (response.statusCode == 200) {
       List<dynamic> eventData = jsonDecode(response.body);
@@ -48,7 +50,8 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> fetchParticipantData() async {
-    final response = await http.get(Uri.parse('https://fasttealbike95.conveyor.cloud/gateway/participant'));
+    final response = await http.get(Uri.parse(
+        'https://tallbrushedpen19.conveyor.cloud/gateway/participant'));
 
     if (response.statusCode == 200) {
       List<dynamic> participantData = jsonDecode(response.body);
@@ -60,8 +63,23 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
+  Future<void> fetchSessionData() async {
+    final response = await http.get(
+        Uri.parse('https://tallbrushedpen19.conveyor.cloud/gateway/session'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> sessionData = jsonDecode(response.body);
+      setState(() {
+        sessionCount = sessionData.length;
+      });
+    } else {
+      throw Exception('Failed to load session data');
+    }
+  }
+
   Future<void> fetchCityData() async {
-    final response = await http.get(Uri.parse('https://fasttealbike95.conveyor.cloud/gateway/city'));
+    final response = await http
+        .get(Uri.parse('https://tallbrushedpen19.conveyor.cloud/gateway/city'));
 
     if (response.statusCode == 200) {
       List<dynamic> cityData = jsonDecode(response.body);
@@ -75,7 +93,8 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> fetchLatestEventData() async {
-    final response = await http.get(Uri.parse('https://fasttealbike95.conveyor.cloud/gateway/event'));
+    final response = await http.get(
+        Uri.parse('https://tallbrushedpen19.conveyor.cloud/gateway/event'));
 
     if (response.statusCode == 200) {
       List<dynamic> eventData = jsonDecode(response.body);
@@ -89,61 +108,180 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
+  Future<List<dynamic>> fetchAllEvents() async {
+    final response = await http.get(
+        Uri.parse('https://tallbrushedpen19.conveyor.cloud/gateway/event'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> eventData = jsonDecode(response.body);
+      return eventData;
+    } else {
+      throw Exception('Failed to load event data');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Center(
-          child: Row(
-            children: [
-              Image.asset(
-                'assets/images/logo-only.png',
-                height: 40,
-                width: 40,
-              ),
-            ],
+          child: Image.asset(
+            'assets/images/logo-only.png',
+            height: 40,
+            width: 40,
           ),
         ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Event count
-              Text('Events: $eventCount'),
-              SizedBox(height: 10),
-              // Participant count
-              Text('Participants: $participantCount'),
-              SizedBox(height: 10),
-              // Session count
-              Text('Sessions: $sessionCount'),
-              SizedBox(height: 10),
-              // City count
-              Text('Cities: $cityCount'),
-              SizedBox(height: 10),
-              // Cities list
-              Text('City Names:'),
-              Column(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: buildCounterCard(title: 'Events', count: eventCount),
+                ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: buildCounterCard(
+                      title: 'Participants', count: participantCount),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child:
+                      buildCounterCard(title: 'Sessions', count: sessionCount),
+                ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: buildCounterCard(title: 'Cities', count: cityCount),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            SizedBox(height: 20),
+            Text(
+              'All Events',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            FutureBuilder(
+              future: fetchAllEvents(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  List<dynamic> events = snapshot.data ?? [];
+                  return Column(
+                    children:
+                        events.map((event) => buildEventCard(event)).toList(),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildCounterCard({required String title, required int count}) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 3,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12.0),
+        child: Material(
+          elevation: 3,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  count.toString(),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildEventCard(Map<String, dynamic> event) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventDetailPage(event: event),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Hero(
+          tag: event['id'],
+          child: Card(
+            elevation: 3,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: cities.map((city) => Text(city)).toList(),
+                children: [
+                  Text(
+                    event['title'],
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Address: ${event['address']}',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  Text(
+                    'Start Date: ${event['startDate']}',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  Text(
+                    'End Date: ${event['endDate']}',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  SizedBox(height: 10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.network(
+                      event['imagePath'],
+                      width: double.infinity,
+                      height: 150,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: 20),
-              // Latest event details
-              Text('Latest Event:'),
-              SizedBox(height: 5),
-              if (latestEvent.isNotEmpty)
-                EventDetailCard(
-                  eventName: latestEvent['name'],
-                  date: latestEvent['date'],
-                  places: latestEvent['places'],
-                  local: latestEvent['local'],
-                )
-              else
-                Text('No events available'),
-            ],
+            ),
           ),
         ),
       ),
@@ -151,81 +289,53 @@ class _ScanPageState extends State<ScanPage> {
   }
 }
 
-class EventDetailCard extends StatelessWidget {
-  final String? date;
-  final String? eventName;
-  final int? places;
-  final String? local;
+class EventDetailPage extends StatelessWidget {
+  final Map<String, dynamic> event;
 
-  const EventDetailCard({
-    Key? key,
-    this.date,
-    this.eventName,
-    this.places,
-    this.local,
-  }) : super(key: key);
+  const EventDetailPage({Key? key, required this.event}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: Offset(0, 3),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Event Details'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Hero(
+              tag: event['id'],
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.network(
+                  event['imagePath'],
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              event['title'],
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Address: ${event['address']}',
+              style: TextStyle(fontSize: 18),
+            ),
+            Text(
+              'Start Date: ${event['startDate']}',
+              style: TextStyle(fontSize: 18),
+            ),
+            Text(
+              'End Date: ${event['endDate']}',
+              style: TextStyle(fontSize: 18),
             ),
           ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      eventName ?? '',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      local ?? '',
-                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 14, color: Colors.grey),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      'Date: $date',
-                      style: TextStyle(fontStyle: FontStyle.normal, fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 10),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'Available Places: $places',
-                  style: TextStyle(color: Colors.white, fontSize: 14),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

@@ -11,10 +11,20 @@ class _QRCheckPageState extends State<QRCheckPage> {
   String qrResult = "";
 
   Future<void> verifyQRCode(String qrResult) async {
+    // Splitting the qrResult string into idParticipant and idEvent
+    List<String> qrParts = qrResult.split('/');
+    if (qrParts.length != 2) {
+      _showErrorSnackBar('Invalid QR Code format');
+      return;
+    }
+    String idParticipant = qrParts[0];
+    String idEvent = qrParts[1];
+
     final url = Uri.parse(
-        'https://fasttealbike95.conveyor.cloud/gateway/EventParticipant/VerifyQRCode');
+        'https://tallbrushedpen19.conveyor.cloud/gateway/EventParticipant/VerifyQRCode');
     final requestBody = {
-      "qrResult": qrResult,
+      "id_Participant": idParticipant,
+      "id_Event": idEvent,
       "isParticipated": true,
     };
 
@@ -28,15 +38,15 @@ class _QRCheckPageState extends State<QRCheckPage> {
       );
 
       if (response.statusCode == 200) {
-        _showSuccessSnackBar('QR Code verified successfully');
+        _showSuccessSnackBar('Participant verified successfully');
       } else if (response.statusCode == 404) {
-        _showErrorSnackBar('QR Code not found');
+        _showErrorSnackBar('Participant not found');
       } else {
         _showErrorSnackBar(
-            'Failed to verify QR Code. Status code: ${response.statusCode}');
+            'Failed to verify Participant. Status code: ${response.statusCode}');
       }
     } catch (e) {
-      _showErrorSnackBar('Error occurred while verifying QR Code: $e');
+      _showErrorSnackBar('Error occurred while verifying Participant: $e');
     }
   }
 
