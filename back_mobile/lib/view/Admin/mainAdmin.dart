@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:back_mobile/controllers/Constant.dart';
 
 class MainPage extends StatelessWidget {
   @override
@@ -24,6 +25,7 @@ class _ScanPageState extends State<ScanPage> {
   int cityCount = 0;
   List<String> cities = [];
   Map<String, dynamic> latestEvent = {};
+  String url = Constant.apiUrl;
 
   @override
   void initState() {
@@ -36,9 +38,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> fetchEventData() async {
-    final response = await http.get(
-        Uri.parse('https://tallbrushedpen19.conveyor.cloud/gateway/event'));
-
+    final response = await http.get(Uri.parse('$url/event'));
     if (response.statusCode == 200) {
       List<dynamic> eventData = jsonDecode(response.body);
       setState(() {
@@ -50,9 +50,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> fetchParticipantData() async {
-    final response = await http.get(Uri.parse(
-        'https://tallbrushedpen19.conveyor.cloud/gateway/participant'));
-
+    final response = await http.get(Uri.parse('$url/participant'));
     if (response.statusCode == 200) {
       List<dynamic> participantData = jsonDecode(response.body);
       setState(() {
@@ -64,9 +62,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> fetchSessionData() async {
-    final response = await http.get(
-        Uri.parse('https://tallbrushedpen19.conveyor.cloud/gateway/session'));
-
+    final response = await http.get(Uri.parse('$url/session'));
     if (response.statusCode == 200) {
       List<dynamic> sessionData = jsonDecode(response.body);
       setState(() {
@@ -78,9 +74,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> fetchCityData() async {
-    final response = await http
-        .get(Uri.parse('https://tallbrushedpen19.conveyor.cloud/gateway/city'));
-
+    final response = await http.get(Uri.parse('$url/city'));
     if (response.statusCode == 200) {
       List<dynamic> cityData = jsonDecode(response.body);
       setState(() {
@@ -93,9 +87,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> fetchLatestEventData() async {
-    final response = await http.get(
-        Uri.parse('https://tallbrushedpen19.conveyor.cloud/gateway/event'));
-
+    final response = await http.get(Uri.parse('$url/event'));
     if (response.statusCode == 200) {
       List<dynamic> eventData = jsonDecode(response.body);
       if (eventData.isNotEmpty) {
@@ -109,12 +101,9 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<List<dynamic>> fetchAllEvents() async {
-    final response = await http.get(
-        Uri.parse('https://tallbrushedpen19.conveyor.cloud/gateway/event'));
-
+    final response = await http.get(Uri.parse('$url/event'));
     if (response.statusCode == 200) {
-      List<dynamic> eventData = jsonDecode(response.body);
-      return eventData;
+      return jsonDecode(response.body);
     } else {
       throw Exception('Failed to load event data');
     }
@@ -122,13 +111,14 @@ class _ScanPageState extends State<ScanPage> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         title: Center(
           child: Image.asset(
             'assets/images/logo-only.png',
-            height: 40,
-            width: 40,
+            height: width * 0.1,
+            width: width * 0.1,
           ),
         ),
         centerTitle: true,
@@ -145,8 +135,7 @@ class _ScanPageState extends State<ScanPage> {
                 ),
                 SizedBox(width: 20),
                 Expanded(
-                  child: buildCounterCard(
-                      title: 'Participants', count: participantCount),
+                  child: buildCounterCard(title: 'Participants', count: participantCount),
                 ),
               ],
             ),
@@ -154,8 +143,7 @@ class _ScanPageState extends State<ScanPage> {
             Row(
               children: [
                 Expanded(
-                  child:
-                      buildCounterCard(title: 'Sessions', count: sessionCount),
+                  child: buildCounterCard(title: 'Sessions', count: sessionCount),
                 ),
                 SizedBox(width: 20),
                 Expanded(
@@ -163,7 +151,6 @@ class _ScanPageState extends State<ScanPage> {
                 ),
               ],
             ),
-            SizedBox(height: 20),
             SizedBox(height: 20),
             Text(
               'All Events',
@@ -180,8 +167,7 @@ class _ScanPageState extends State<ScanPage> {
                 } else {
                   List<dynamic> events = snapshot.data ?? [];
                   return Column(
-                    children:
-                        events.map((event) => buildEventCard(event)).toList(),
+                    children: events.map((event) => buildEventCard(event)).toList(),
                   );
                 }
               },
@@ -210,7 +196,7 @@ class _ScanPageState extends State<ScanPage> {
         child: Material(
           elevation: 3,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -232,54 +218,57 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Widget buildEventCard(Map<String, dynamic> event) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => EventDetailPage(event: event),
-          ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: Hero(
-          tag: event['id'],
-          child: Card(
-            elevation: 3,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event['title'],
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Address: ${event['address']}',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  Text(
-                    'Start Date: ${event['startDate']}',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  Text(
-                    'End Date: ${event['endDate']}',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.network(
-                      event['imagePath'],
-                      width: double.infinity,
-                      height: 150,
-                      fit: BoxFit.cover,
+    return FadeInEventCard(
+      delay: 500, // delay in milliseconds
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EventDetailPage(event: event),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: Hero(
+            tag: event['id'],
+            child: Card(
+              elevation: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event['title'],
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 10),
+                    Text(
+                      'Address: ${event['address']}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    Text(
+                      'Start Date: ${event['startDate']}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    Text(
+                      'End Date: ${event['endDate']}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.network(
+                        event['imagePath'],
+                        width: double.infinity,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -338,6 +327,46 @@ class EventDetailPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class FadeInEventCard extends StatefulWidget {
+  final Widget child;
+  final int delay;
+
+  const FadeInEventCard({Key? key, required this.child, this.delay = 500}) : super(key: key);
+
+  @override
+  _FadeInEventCardState createState() => _FadeInEventCardState();
+}
+
+class _FadeInEventCardState extends State<FadeInEventCard> with SingleTickerProviderStateMixin {
+  AnimationController? controller;
+  Animation<double>? animation;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+      duration: Duration(milliseconds: widget.delay),
+      vsync: this,
+    );
+    animation = Tween(begin: 0.0, end: 1.0).animate(controller!);
+    controller?.forward();
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: animation!,
+      child: widget.child,
     );
   }
 }

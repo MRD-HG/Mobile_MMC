@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:io';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:back_mobile/controllers/Constant.dart';
 
 class QRCheckPage extends StatefulWidget {
   @override
@@ -8,20 +11,42 @@ class QRCheckPage extends StatefulWidget {
 }
 
 class _QRCheckPageState extends State<QRCheckPage> {
-  String qrResult = "";
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  QRViewController? controller;
+  String urlC = Constant.apiUrl;
 
-  Future<void> verifyQRCode(String qrResult) async {
-    // Splitting the qrResult string into idParticipant and idEvent
-    List<String> qrParts = qrResult.split('/');
+  @override
+  void reassemble() {
+    super.reassemble();
+    if (Platform.isAndroid) {
+      controller!.pauseCamera();
+    }
+    controller!.resumeCamera();
+  }
+
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    controller.scannedDataStream.listen((scanData) {
+      controller.pauseCamera();
+      verifyQRCode(scanData.code);
+    });
+  }
+
+  Future<void> verifyQRCode(String? qrResult) async {
+    if (qrResult == null) {
+      _showErrorSnackBar('No QR Code detected');
+      return;
+    }
+
+    List<String> qrParts = qrResult.split('#');
     if (qrParts.length != 2) {
       _showErrorSnackBar('Invalid QR Code format');
       return;
     }
-    String idParticipant = qrParts[0];
-    String idEvent = qrParts[1];
+    String idEvent = qrParts[0];
+    String idParticipant = qrParts[1];
 
-    final url = Uri.parse(
-        'https://tallbrushedpen19.conveyor.cloud/gateway/EventParticipant/VerifyQRCode');
+    final url = Uri.parse('$urlC/EventParticipant/VerifyQRCode');
     final requestBody = {
       "id_Participant": idParticipant,
       "id_Event": idEvent,
@@ -74,23 +99,29 @@ class _QRCheckPageState extends State<QRCheckPage> {
       appBar: AppBar(
         title: Text('QR Check Page'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'QR Result: $qrResult',
-              style: TextStyle(fontSize: 18),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 5,
+            child: QRView(
+              key: qrKey,
+              onQRViewCreated: _onQRViewCreated,
             ),
-            ElevatedButton(
-              onPressed: () {
-                verifyQRCode(qrResult);
-              },
-              child: Text('Verify QR Code'),
+          ),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: Text('Scan a code'),
             ),
-          ],
-        ),
+          )
+        ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
   }
 }
