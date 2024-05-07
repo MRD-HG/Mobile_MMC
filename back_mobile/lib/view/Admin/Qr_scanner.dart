@@ -1,108 +1,29 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:io';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:back_mobile/controllers/Constant.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class QRCheckPage extends StatefulWidget {
+import '../../controllers/Constant.dart';
+
+class QRCodeScanner extends StatefulWidget {
   @override
-  _QRCheckPageState createState() => _QRCheckPageState();
+  _QRCodeScannerState createState() => _QRCodeScannerState();
 }
 
-class _QRCheckPageState extends State<QRCheckPage> {
+class _QRCodeScannerState extends State<QRCodeScanner> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  Barcode? result;
   QRViewController? controller;
   String urlC = Constant.apiUrl;
-
-  @override
-  void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      controller!.pauseCamera();
-    }
-    controller!.resumeCamera();
-  }
-
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
-      controller.pauseCamera();
-      verifyQRCode(scanData.code);
-    });
-  }
-
-  Future<void> verifyQRCode(String? qrResult) async {
-    if (qrResult == null) {
-      _showErrorSnackBar('No QR Code detected');
-      return;
-    }
-
-    List<String> qrParts = qrResult.split('#');
-    if (qrParts.length != 2) {
-      _showErrorSnackBar('Invalid QR Code format');
-      return;
-    }
-    String idEvent = qrParts[0];
-    String idParticipant = qrParts[1];
-
-    final url = Uri.parse('$urlC/EventParticipant/VerifyQRCode');
-    final requestBody = {
-      "id_Participant": idParticipant,
-      "id_Event": idEvent,
-      "isParticipated": true,
-    };
-
-    try {
-      final response = await http.put(
-        url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(requestBody),
-      );
-
-      if (response.statusCode == 200) {
-        _showSuccessSnackBar('Participant verified successfully');
-      } else if (response.statusCode == 404) {
-        _showErrorSnackBar('Participant not found');
-      } else {
-        _showErrorSnackBar(
-            'Failed to verify Participant. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      _showErrorSnackBar('Error occurred while verifying Participant: $e');
-    }
-  }
-
-  void _showSuccessSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
-
+  int participantCount = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('QR Check Page'),
-      ),
       body: Column(
-        children: <Widget>[
+        children: [
           Expanded(
-            flex: 5,
+            flex: 4,
             child: QRView(
               key: qrKey,
               onQRViewCreated: _onQRViewCreated,
@@ -111,13 +32,81 @@ class _QRCheckPageState extends State<QRCheckPage> {
           Expanded(
             flex: 1,
             child: Center(
-              child: Text('Scan a code'),
+              child: (result != null)
+                  ? Text('Barcode Data: ${result!.code}')
+                  : Text('Scan a code'),
             ),
           )
         ],
       ),
     );
   }
+
+ void _onQRViewCreated(QRViewController controller) {
+  this.controller = controller;
+  controller.scannedDataStream.listen((scanData) async {
+   
+    // controller.pauseCamera();
+
+  
+    List<String> values = scanData.code!.split('#');
+    if (values.length == 2) {
+      String idParticipant = values[0];
+      String idEvent = values[1];
+      await verifyQRCode(idParticipant, idEvent);
+    }
+
+    
+    await Future.delayed(Duration(seconds: 2));
+    controller.resumeCamera();
+  });
+}
+ 
+Future<void> fetchParticipantData() async {
+  final response = await http.get(Uri.parse('$urlC/Participant/'));
+  if(response.statusCode ==200){
+    List<dynamic> participantData = jsonDecode((response.body));
+    setState(() {
+      participantCount= participantData.length;
+    });
+    
+  }
+  else{
+      throw Exception('Failed to load Participant Data');
+    }
+}
+
+ Future<void> verifyQRCode(String idParticipant, String idEvent) async {
+  print("$idEvent + $idParticipant");
+    String apiUrl = '$urlC/EventParticipant/VerifyQRCode';
+    Map<String, dynamic> requestPayload = {
+      'id_Participant': idParticipant,
+      'id_Event': idEvent,
+      'isParticipated': true,
+    };
+
+    try {
+      final response = await http.put(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestPayload),
+      );
+
+      if (response.statusCode == 200) {
+        Fluttertoast.showToast(msg: 'Verification Successful', backgroundColor: Colors.green);
+      } else {
+        Fluttertoast.showToast(
+          msg: 'Verification Failed: ${response.statusCode}',
+          backgroundColor: Colors.red,
+        );
+        print('Error: ${response.body}');  
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'Error: $e', backgroundColor: Colors.red);
+      print('Exception: $e');  
+    }
+  }
+
 
   @override
   void dispose() {
